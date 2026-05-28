@@ -2,7 +2,7 @@
 
 Tauri 2 desktop app for the APF-SEB force sensor workflow. The app streams APF serial lines, shows live force, temperature, sensor serial number, and a force history plot, and can export capture logs as CSV.
 
-The current app version is `0.1.0`.
+The current app version is `0.2.2`.
 
 ## Launch
 
