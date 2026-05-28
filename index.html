@@ -3,101 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>IMU FFT</title>
+    <title>APF-SEB Demo</title>
+    <link rel="stylesheet" href="/src/styles/global.css" />
   </head>
   <body>
-    <div id="app">
-      <header class="topbar">
-        <div class="topbar-left">
-          <div id="status-indicator" class="status-indicator searching" role="status" aria-live="polite" aria-label="No Sensor connected" data-tooltip="No Sensor connected" data-tooltip-align="start" tabindex="0">
-            <span id="status-dot" class="status-dot searching"></span>
-          </div>
-        </div>
-        <div class="topbar-right">
-          <div class="top-readouts">
-            <div class="top-readout">
-              <span class="top-readout-label">Peak</span>
-              <strong id="peak-value">0.00 Hz</strong>
-              <span class="axis-chip" id="peak-axis">X</span>
-            </div>
-            <div class="top-readout">
-              <span class="top-readout-label">Ax</span>
-              <strong id="head-ax">0.000</strong>
-            </div>
-            <div class="top-readout">
-              <span class="top-readout-label">Ay</span>
-              <strong id="head-ay">0.000</strong>
-            </div>
-            <div class="top-readout">
-              <span class="top-readout-label">Az</span>
-              <strong id="head-az">0.000</strong>
-            </div>
-            <div class="top-readout">
-              <span class="top-readout-label">Tilt X</span>
-              <strong id="head-tilt-x">0.0deg</strong>
-            </div>
-            <div class="top-readout">
-              <span class="top-readout-label">Tilt Y</span>
-              <strong id="head-tilt-y">0.0deg</strong>
-            </div>
-          </div>
-          <div class="topbar-controls">
-            <label class="switch-control" for="simulation-toggle">
-              <input id="simulation-toggle" type="checkbox" />
-              <span class="switch-track" aria-hidden="true">
-                <span class="switch-thumb"></span>
-              </span>
-              <span class="switch-label">Simulation</span>
-            </label>
-            <button id="tare-button" class="ghost-button icon-button" type="button" aria-label="Tare" data-tooltip="Tare">
-              <span id="tare-icon" class="button-icon" aria-hidden="true"></span>
-            </button>
-            <div id="update-notice" class="update-notice" hidden>
-              <button id="update-install-button" class="ghost-button icon-button update-button" type="button" aria-label="Install update" aria-live="polite" data-tooltip="Install update" data-tooltip-align="end">
-                <span id="update-install-icon" class="button-icon" aria-hidden="true"></span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <main class="workspace">
-        <section class="panel model-panel" aria-label="3D model">
-          <div class="panel-title">
-            <span class="panel-title-label">3D</span>
-          </div>
-          <div id="model-view"></div>
-        </section>
-
-        <section class="charts" aria-label="Live charts">
-          <div class="panel chart-panel fft-panel">
-            <div class="panel-title">
-              <span class="panel-title-label">Accelerometer</span>
-              <div class="legend">
-                <button class="legend-item" type="button" data-accel-axis="x" aria-pressed="true">
-                  <span class="legend-dot" style="background:#e11d74"></span>X
-                </button>
-                <button class="legend-item" type="button" data-accel-axis="y" aria-pressed="true">
-                  <span class="legend-dot" style="background:#7c3aed"></span>Y
-                </button>
-                <button class="legend-item" type="button" data-accel-axis="z" aria-pressed="true">
-                  <span class="legend-dot" style="background:#0ea5a4"></span>Z
-                </button>
-              </div>
-            </div>
-            <div id="accel-chart" class="live-chart"></div>
-          </div>
-          <div class="panel chart-panel">
-            <div class="panel-title">
-              <span class="panel-title-group">
-                <span class="panel-title-label">FFT</span>
-              </span>
-            </div>
-            <div id="fft-chart" class="live-chart"></div>
-          </div>
-        </section>
-      </main>
-    </div>
-    <script type="module" src="/src/main.ts"></script>
+    <div id="app" />
+    <script type="module" src="/src/renderer.ts"></script>
   </body>
 </html>
+
+

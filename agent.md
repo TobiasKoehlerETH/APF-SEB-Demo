@@ -2,15 +2,9 @@
 
 ## Project Shape
 
-`imu-fft` is a small Tauri 2 desktop app for visualizing an ICM-42688-P IMU UART stream. The frontend is Vite + TypeScript with ECharts, Three.js, and Lucide icons. The backend is Rust under `src-tauri`, where the serial reader, frame parser, simulator, orientation model, low-pass filtered pose input, and FFT analysis live.
+`apf-seb-demo` is a Tauri 2 desktop app for the APF-SEB force sensor workflow. The frontend is Vite + React + TypeScript with Tailwind-style CSS, shadcn-style controls, Lucide React icons, and ECharts. The backend is Rust under `src-tauri`.
 
-The app expects binary `0xAA 0x55` frames at `921600` baud. If no serial port is available, the UI can run with bounded simulated data.
-
-## Current Memory
-
-Read [`memory.md`](memory.md) before making changes. It summarizes the latest repo work, recent release/versioning changes, and any open context that is easy to lose between sessions.
-
-Keep [`README.md`](README.md) aligned with user-facing behavior, setup, packaging, releases, verification, and notable technical design notes.
+The app reads APF serial text lines at `115200` baud. Selecting a COM port sends `log=0`, `sn`, and `log=20`, then emits Tauri events for sensor data, status, metadata, and capture state.
 
 ## Common Commands
 
@@ -23,7 +17,7 @@ npm run build
 npm test
 ```
 
-`npm run dev` starts the Vite frontend on `http://127.0.0.1:1420` and launches the Tauri desktop window. `npm run build` builds the frontend and Rust backend. `npm test` runs `cargo test --manifest-path src-tauri/Cargo.toml`.
+`npm run dev` starts Vite on `http://127.0.0.1:1420` and launches the Tauri desktop window. `npm run build` builds the frontend and Rust backend. `npm test` runs `cargo test --manifest-path src-tauri/Cargo.toml`.
 
 For release packaging:
 
@@ -39,33 +33,25 @@ node scripts/bump-version.mjs --bump patch
 
 ## Important Files
 
-- `src/main.ts` owns the browser/Tauri UI wiring, chart setup, simulated browser preview, update checks, and Tauri event listeners.
-- `index.html` owns the visible shell, hover-only status LED, shared `data-tooltip` topbar tooltip hooks, chart containers, and icon mount points.
-- `src/model.ts` owns the Three.js model view.
-- `src/style.css` owns the application layout and visual system.
-- `src-tauri/src/main.rs` registers Tauri commands and starts the stream controller.
-- `src-tauri/src/stream.rs` owns serial discovery, simulation, event emission, frame parsing, sample buffering, low-pass filtered accelerometer input for pose estimation, and orientation snapshots.
-- `src-tauri/src/dsp.rs` owns FFT constants, windowing, DC removal, peak detection, and DSP unit tests.
+- `src/App.tsx` wires the APF dashboard into the Tauri app shell.
+- `src/sensor-api.ts` is the frontend adapter for Tauri commands and events.
+- `src/contexts/SensorStreamContext.tsx` normalizes sensor data and serial metadata for the UI.
+- `src/contexts/DataCaptureContext.tsx` records live samples into the Rust capture store.
+- `src-tauri/src/serial_stream.rs` owns COM port listing, selected-port streaming, APF line parsing, init commands, and tare forwarding.
+- `src-tauri/src/capture.rs` owns capture state and CSV export.
+- `src-tauri/src/profile.rs` owns optional profile ID parsing.
 - `src-tauri/tauri.conf.json` owns app metadata, bundling, and updater settings.
 - `.github/workflows/release.yml` publishes MSI releases and updater metadata.
 
 ## Engineering Constraints
 
-Keep the streaming path cheap. The parser and sample ring are intentionally allocation-light and bounded because the IMU stream runs at 8000 samples/s. Avoid adding per-byte or per-sample heap allocation, logging, event emission, or UI work.
+Keep release/updater behavior aligned with IMU FFT: the workflow should produce signed updater metadata, and the app should keep the titlebar update icon for available updates and progress/errors.
 
-Keep UI updates cadence-based. The Rust backend emits model, acceleration, FFT, and status events on timed intervals; it should not emit one event per sample or frame.
+Keep serial behavior APF-specific. Do not reintroduce IMU binary frame parsing, FFT processing, 3D model rendering, or simulation unless explicitly requested.
 
-Keep pose smoothing scoped. The 3D model and topbar `Tilt X` / `Tilt Y` readouts use the filtered accelerometer sample in the `model` event, while the accelerometer chart and FFT remain tied to the raw sample ring.
+Keep capture output compatible with the APF-SEB desktop workflow: CSV header `timestamp,uncalibrated_output,force_newtons,temperature_raw_c,serial_number`, serial-number suffixes where available, and split files before Excel's sheet row limit.
 
-Keep the browser preview useful. `src/main.ts` supports a non-Tauri preview path using simulated data; changes to the UI should continue to work when opened by Vite alone.
-
-Keep hover text consistent. Topbar hover/focus labels should use the shared `data-tooltip` CSS pattern, not native `title` attributes, so only one tooltip appears.
-
-Preserve Tauri updater behavior. Version changes should stay coordinated across `package.json`, `package-lock.json`, `src-tauri/Cargo.toml`, and `src-tauri/tauri.conf.json`.
-
-Every GitHub release must include a release-notes section with a bullet-point list of the major user-facing changes in that version. Keep the installer guidance, but do not publish a release body that only lists download instructions.
-
-Latest release target: `0.1.5` stabilizes topbar readout widths so live values do not shift neighboring controls, and removes the help cursor from the status LED hover state.
+Keep versions aligned across `package.json`, `package-lock.json`, `src-tauri/Cargo.toml`, and `src-tauri/tauri.conf.json`.
 
 ## Testing Expectations
 
@@ -75,14 +61,20 @@ For frontend or packaging changes, run:
 npm run build
 ```
 
-For Rust stream, parser, simulator, orientation, or DSP changes, run:
+For Rust serial or capture changes, run:
 
 ```powershell
 npm test
 ```
 
-When touching release automation or versioning, also inspect the generated diff for version consistency.
+For launch smoke tests, run:
+
+```powershell
+npm run dev
+```
+
+Then confirm the `apf-seb-demo.exe` process is responding and `http://127.0.0.1:1420/` returns HTTP 200.
 
 ## Repo Hygiene
 
-Do not commit generated build output from `dist`, `dist-desktop`, `node_modules`, or Tauri target folders. Be careful with hardware-specific assumptions: the app chooses the first detected COM-style serial port on Windows, then falls back to any available serial port.
+Do not commit generated build output from `dist`, `node_modules`, or `src-tauri/target`. Be careful with hardware-specific assumptions: the app only connects after a user selects a serial port in Settings.

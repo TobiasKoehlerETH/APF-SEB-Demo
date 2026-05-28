@@ -92,15 +92,15 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           tagName: v${{ steps.version.outputs.app_version }}
-          releaseName: IMU FFT v${{ steps.version.outputs.app_version }}
+          releaseName: APF-SEB Demo v${{ steps.version.outputs.app_version }}
           releaseBody: |
             Major changes:
-            - Stabilizes topbar readout widths so live values no longer shift neighboring controls.
-            - Adds a little extra readout padding for a calmer topbar layout.
-            - Removes the question-mark help cursor from the top-left status LED hover state.
-            - Keeps the shared status tooltip behavior for connected, simulation, and no-sensor states.
+            - Provides the APF-SEB force sensor dashboard as a native Tauri app.
+            - Streams APF serial force, temperature, count, and sensor metadata data.
+            - Adds CSV capture logging with serial-number-aware filenames.
+            - Keeps the same updater workflow and in-app update icon behavior as IMU FFT.
 
-            Download the Windows installer asset named `IMU.FFT_${{ steps.version.outputs.app_version }}_x64_en-US.msi`.
+            Download the Windows installer asset named `APF-SEB.Demo_${{ steps.version.outputs.app_version }}_x64_en-US.msi`.
 
             The `.sig` file and `latest.json` asset are used by the in-app auto updater and do not need to be downloaded manually.
           releaseDraft: false
