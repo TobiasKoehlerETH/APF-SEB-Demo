@@ -13,6 +13,7 @@ const BAUD_RATE: u32 = 115_200;
 const READ_TIMEOUT: Duration = Duration::from_millis(500);
 const RETRY_INTERVAL: Duration = Duration::from_millis(2_500);
 const INIT_COMMAND_PAUSE: Duration = Duration::from_millis(200);
+const TARE_COMMAND: &str = "tare";
 
 #[derive(Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -146,7 +147,7 @@ impl SerialController {
     }
 
     pub fn tare(&self) -> TareResult {
-        match self.send_command("tare") {
+        match self.send_command(TARE_COMMAND) {
             Ok(()) => TareResult {
                 success: Some(true),
                 error: None,
@@ -254,8 +255,8 @@ fn run_serial_worker(
     }
 }
 
-pub fn init_commands() -> [&'static str; 3] {
-    ["log=0", "sn", "log=20"]
+pub fn init_commands() -> [&'static str; 4] {
+    [TARE_COMMAND, "log=0", "sn", "log=20"]
 }
 
 fn send_init_commands(port: &mut Box<dyn SerialPort>, stop: &AtomicBool) {
@@ -445,6 +446,6 @@ mod tests {
 
     #[test]
     fn init_command_sequence_matches_apf_helper() {
-        assert_eq!(init_commands(), ["log=0", "sn", "log=20"]);
+        assert_eq!(init_commands(), ["tare", "log=0", "sn", "log=20"]);
     }
 }
