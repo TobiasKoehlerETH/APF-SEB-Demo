@@ -113,7 +113,6 @@ export function SensorStreamProvider({ children }: { children: React.ReactNode }
   const [serialPortsError, setSerialPortsError] = useState<string | null>(null);
   const [selectedSerialPort, setSelectedSerialPort] = useState<string | null>(null);
   const [sensorSerialNumber, setSensorSerialNumber] = useState<string | null>(null);
-  const [autoSelectEnabled, setAutoSelectEnabled] = useState(true);
   const [resetCounter, setResetCounter] = useState(0);
   const lastTimestampRef = useRef<number | null>(null);
 
@@ -144,9 +143,6 @@ export function SensorStreamProvider({ children }: { children: React.ReactNode }
     try {
       await sensorApi.selectSerialPort(normalized);
       setSelectedSerialPort(normalized);
-      if (normalized) {
-        setAutoSelectEnabled(true);
-      }
     } catch (error) {
       setStatus(
         error instanceof Error ? error.message : "Failed to select serial port",
@@ -164,20 +160,6 @@ export function SensorStreamProvider({ children }: { children: React.ReactNode }
       setStatus(error instanceof Error ? error.message : "Failed to send tare");
     }
   }, []);
-
-  useEffect(() => {
-    void refreshSerialPorts();
-  }, [refreshSerialPorts]);
-
-  useEffect(() => {
-    if (!autoSelectEnabled || selectedSerialPort || serialPorts.length === 0) {
-      return;
-    }
-    const first = serialPorts[0];
-    if (first?.path) {
-      void selectSerialPort(first.path);
-    }
-  }, [autoSelectEnabled, selectedSerialPort, serialPorts, selectSerialPort]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -273,7 +255,6 @@ export function SensorStreamProvider({ children }: { children: React.ReactNode }
       }
     }
 
-    setAutoSelectEnabled(false);
     setSelectedSerialPort(null);
     setSample(DEFAULT_SAMPLE);
     setRecentSamples([]);
