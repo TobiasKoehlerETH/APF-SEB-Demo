@@ -10,6 +10,9 @@ import { useSensorStream } from "@/contexts/SensorStreamContext";
 import { cn } from "@/utils/tailwind";
 
 const HISTORY_WINDOW_MS = 30_000;
+const HISTORY_WINDOW_SECONDS = HISTORY_WINDOW_MS / 1000;
+const X_AXIS_SCROLL_STEP_SECONDS = 0.01;
+const X_AXIS_TICK_INTERVAL_SECONDS = 5;
 const MIN_Y_AXIS_MAX = 1;
 const Y_AXIS_PADDING_RATIO = 0.15;
 
@@ -29,7 +32,22 @@ function computePaddedMax(value: number): number {
     return MIN_Y_AXIS_MAX;
   }
   const padded = value + value * Y_AXIS_PADDING_RATIO;
-  return Math.max(MIN_Y_AXIS_MAX, padded);
+  const magnitude = 10 ** Math.floor(Math.log10(padded));
+  const normalized = padded / magnitude;
+  const niceNormalized =
+    normalized <= 1
+      ? 1
+      : normalized <= 1.5
+        ? 1.5
+      : normalized <= 2
+        ? 2
+        : normalized <= 2.5
+          ? 2.5
+        : normalized <= 5
+          ? 5
+          : 10;
+
+  return Math.max(MIN_Y_AXIS_MAX, Math.ceil(niceNormalized * magnitude));
 }
 
 export default function ForceHistoryCard({
@@ -101,9 +119,14 @@ export default function ForceHistoryCard({
     const lastSample =
       samples.length > 0 ? samples[samples.length - 1]! : null;
     const lastSeconds = lastSample?.seconds ?? 0;
+    const maxSeconds = Math.max(
+      HISTORY_WINDOW_SECONDS,
+      Math.ceil(lastSeconds / X_AXIS_SCROLL_STEP_SECONDS) *
+        X_AXIS_SCROLL_STEP_SECONDS,
+    );
     const minSeconds = Math.max(
       0,
-      lastSeconds - HISTORY_WINDOW_MS / 1000,
+      maxSeconds - HISTORY_WINDOW_SECONDS,
     );
     const seriesData = samples.map((sample) => [
       sample.seconds,
@@ -117,8 +140,11 @@ export default function ForceHistoryCard({
       xAxis: {
         type: "value",
         min: minSeconds,
-        max: Math.max(lastSeconds, HISTORY_WINDOW_MS / 1000),
-        axisLabel: { formatter: "{value}s" },
+        max: maxSeconds,
+        interval: X_AXIS_TICK_INTERVAL_SECONDS,
+        axisLabel: {
+          formatter: (value: number) => `${Math.round(value)}s`,
+        },
         axisPointer: { show: false },
         name: "Time [s]",
         nameLocation: "middle",
@@ -128,7 +154,6 @@ export default function ForceHistoryCard({
           fontWeight: "600",
           color: "#000000",
         },
-        minInterval: 1,
       },
       yAxis: {
         type: "value",
@@ -142,7 +167,8 @@ export default function ForceHistoryCard({
         },
         min: 0,
         max: yAxisMax,
-        axisLabel: { formatter: (value: number) => `${value}` },
+        minInterval: 1,
+        axisLabel: { formatter: (value: number) => `${Math.round(value)}` },
         axisPointer: { show: false },
         splitLine: { lineStyle: { type: "dashed", opacity: 0.4 } },
       },
