@@ -1,4 +1,4 @@
-import { SlidersHorizontal, RefreshCcw, PlugZap } from "lucide-react";
+import { Settings, RefreshCcw, PlugZap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -57,7 +57,7 @@ export default function AppSidebar() {
               className="h-10 w-10"
               title="Select COM port"
             >
-              <SlidersHorizontal className="h-5 w-5" />
+              <Settings className="h-5 w-5" />
               <span className="sr-only">Select COM port</span>
             </Button>
           </DropdownMenuTrigger>

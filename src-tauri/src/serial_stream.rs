@@ -324,14 +324,14 @@ pub fn parse_sensor_payload(raw_line: &str) -> Option<ParsedSensorLine> {
         return None;
     }
 
-    let force_cn = parts.first()?.parse::<f64>().ok()?;
+    let force_mn = parts.first()?.parse::<f64>().ok()?;
     let stale_flag = parts.get(1)?.parse::<i64>().ok()?;
     let counts = parts.get(2)?.parse::<i64>().ok()?;
     let temperature_mdeg_c = parts.get(3)?.parse::<f64>().ok()?;
     let timestamp_ms = parts.last()?.parse::<i64>().ok()?;
 
     Some(ParsedSensorLine {
-        force_newtons: force_cn / 100.0,
+        force_newtons: force_mn / 1000.0,
         stale: stale_flag != 0,
         counts,
         temperature_c: temperature_mdeg_c / 1000.0,
@@ -419,7 +419,7 @@ mod tests {
 
     #[test]
     fn parses_apf_force_line() {
-        let parsed = parse_sensor_payload("10,0,6411,20479,133999").unwrap();
+        let parsed = parse_sensor_payload("100,0,6411,20479,133999").unwrap();
         assert!((parsed.force_newtons - 0.1).abs() < f64::EPSILON);
         assert!(!parsed.stale);
         assert_eq!(parsed.counts, 6411);

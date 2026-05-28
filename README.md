@@ -16,10 +16,10 @@ npm run dev
 The app lists serial ports in Settings. Selecting a port opens it at `115200` baud, sends `log=0`, `sn`, and `log=20`, then parses payloads shaped like:
 
 ```text
-10,0,6411,20479,133999
+100,0,6411,20479,133999
 ```
 
-Those fields are force in centi-newtons, staleness flag, raw counts, temperature in milli-degrees Celsius, and timestamp in milliseconds.
+Those fields are force in millinewtons, staleness flag, raw counts, temperature in milli-degrees Celsius, and timestamp in milliseconds.
 
 ## UI Overview
 
