@@ -5,7 +5,7 @@ import {
   type DownloadEvent,
   type Update,
 } from "@tauri-apps/plugin-updater";
-import { Download, LoaderCircle } from "lucide-react";
+import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/tailwind";
 
@@ -24,7 +24,7 @@ export default function UpdateButton({ className }: UpdateButtonProps) {
   const [pendingUpdate, setPendingUpdate] = React.useState<Update | null>(null);
   const [label, setLabel] = React.useState("Checking for updates");
   const [disabled, setDisabled] = React.useState(true);
-  const [checking, setChecking] = React.useState(true);
+  const [isVisible, setIsVisible] = React.useState(false);
   const downloadedBytes = React.useRef(0);
   const contentLength = React.useRef<number | null>(null);
 
@@ -36,15 +36,13 @@ export default function UpdateButton({ className }: UpdateButtonProps) {
           return;
         }
         setPendingUpdate(update);
+        setIsVisible(true);
         setLabel(`Update ${update.version} available`);
         setDisabled(false);
       })
       .catch((error) => {
         console.warn("Update check failed", error);
         setLabel("Update check failed");
-      })
-      .finally(() => {
-        setChecking(false);
       });
   }, []);
 
@@ -95,6 +93,10 @@ export default function UpdateButton({ className }: UpdateButtonProps) {
     }
   };
 
+  if (!isVisible) {
+    return null;
+  }
+
   return (
     <Button
       type="button"
@@ -110,11 +112,7 @@ export default function UpdateButton({ className }: UpdateButtonProps) {
       disabled={disabled}
       onClick={install}
     >
-      {checking ? (
-        <LoaderCircle aria-hidden="true" className="h-5 w-5 animate-spin" />
-      ) : (
-        <Download aria-hidden="true" className="h-5 w-5" />
-      )}
+      <Download aria-hidden="true" className="h-5 w-5" />
       <span className="sr-only">{label}</span>
     </Button>
   );
